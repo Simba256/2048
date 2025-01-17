@@ -34,7 +34,7 @@ This repository contains a Python-based automation tool for the popular game 204
 1. **Clone** this repository:
    ```bash
    git clone https://github.com/Simba256/2048.git
-   cd 2048-automation
+   cd 2048
    ```
 2. **Install** required packages:
    ```bash
