@@ -118,7 +118,7 @@ This repository contains a Python-based automation tool for the popular game 204
 3. **Deciding the Move (Strategy)**  
    - **Chain of Tiles:** The strategy aims to arrange tiles in a decreasing order starting from the bottom-right corner. The largest tile should be at the bottom-right, the next largest to its left (or adjacent), and so on.
    - **Heuristic Scoring:**  
-     1. **Encourage Larger Tiles:** For every tile on the board, the script adds `pow(3, log2(tile))` to a running score. This rewards creating bigger tiles, since a tile like `32` contributes more than `2` or `16`.  
+     1. **Encourage Larger Tiles:** For every tile on the board, the script adds `pow(3, log2(tile))` to a running score. This rewards creating bigger tiles, since a tile like `32` contributes more than `2`, `16` tiles.  
      2. **Prioritize the Chain:** In addition, for any tile that is in the correct position to maintain the decreasing chain from the bottom-right corner, it adds `pow(4, log2(tile))`. Using base 4 here further emphasizes the importance of tiles placed in descending order.  
 
    This combined scoring heuristic guides the engine to produce larger tiles and keep them aligned in a decreasing sequence along the bottom row and rightmost column, thus maximizing the chance of reaching (and surpassing!) 2048.
@@ -138,4 +138,4 @@ Feel free to submit issues or pull requests to improve the code, enhance detecti
 
 This project is provided under the [MIT License](LICENSE). You are free to fork, modify, and use it for your own 2048 automation endeavors.
 
-**Happy automating, and may you finally reach that coveted 262144 tile (or beyond)!**
+**Happy automating, and may you finally reach that coveted 262144 `👀` tile (or beyond)!**
