@@ -138,4 +138,4 @@ Feel free to submit issues or pull requests to improve the code, enhance detecti
 
 This project is provided under the [MIT License](LICENSE). You are free to fork, modify, and use it for your own 2048 automation endeavors.
 
-**Happy automating, and may you finally reach that coveted 262144 `👀` tile (or beyond)!**
+**Happy automating, and may you finally reach that coveted `262144 👀` tile (or beyond)!**
