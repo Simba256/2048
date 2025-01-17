@@ -2,7 +2,7 @@ import pytesseract
 from PIL import Image
 import argparse
 import os
-acv853
+
 def perform_ocr(image_path, lang='eng'):
     """
     Performs OCR on the given image and returns the extracted text.
