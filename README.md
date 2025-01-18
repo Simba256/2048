@@ -3,6 +3,8 @@
 
 This repository contains a Python-based automation tool for the popular game 2048. The tool attempts to read the game board state and automatically send swipe commands (Up, Down, Left, Right, Undo) to progress through the game. Several approaches to tile detection are included, but the final solution uses **SSIM** comparison against a labeled dataset of tile images (e.g., `2.png`, `4.png`, `8.png`, etc.).
 
+![Demo GIF](2048.gif)
+
 ---
 
 ## Quick Start
@@ -92,7 +94,6 @@ Despite experimenting with multiple methods, **SSIM** emerged as the most reliab
    ```
 4. By default, the bot attempts 1000 moves. You can modify this in the `main.py` file if desired.
 
-![Demo GIF](2048.gif)
 
 ## Configuration
 
