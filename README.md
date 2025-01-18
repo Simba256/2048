@@ -5,27 +5,49 @@ This repository contains a Python-based automation tool for the popular game 204
 
 ---
 
+## Quick Start
+
+1. **Clone the repo** and install dependencies:
+   ```bash
+   git clone https://github.com/Simba256/2048.git
+   cd 2048
+   pip install -r requirements.txt
+   ```
+2. **Open** the 2048 game in **Bluestacks** (or another Android emulator) in **fullscreen** mode (or ensure your coordinates match).
+3. **Run** the main script:
+   ```bash
+   python main.py
+   ```
+4. The bot will attempt up to **1000 moves** by default to combine tiles and reach higher scores.
+
+---
+
+## Comparison of Detection Methods
+
+| **Approach**                                      | **Implementation**      | **Accuracy**   | **Comments**                                                       |
+|---------------------------------------------------|-------------------------|----------------|---------------------------------------------------------------------|
+| **YOLOv11**                                        | Custom dataset          | 60–70%         | Tried multiple configurations; model struggled with numbers |
+| **Tesseract OCR**                                  | Image preprocessing     | ~10%           | OCR was inconsistent for tiles, even after tuning             |
+| **Image Hashing** <br>(average, pHash, wHash, dHash) | Hash-based comparisons  | ~95%           | Lightweight and reasonably fast, but some false positives           |
+| **SSIM** (Final Approach)                         | Structural Similarity   | **100%**       | Perfect accuracy, slightly slower; robust to minor variations       |
+
+Despite experimenting with multiple methods, **SSIM** emerged as the most reliable technique for consistently identifying all tile values.
+
+---
+
 ## Features
 
 - **Multiple tile-detection attempts**:
   - **YOLOv11** with a custom dataset
   - **Tesseract OCR**
-  - **SSIM** (final approach) with labeled tile images
+  - **Hashing** with average, pHash, wHash, dHash
+  - **SSIM** (final approach)
 - **Configurable key mappings** for sending swipe and undo commands
 - **Screenshots** for each cell (e.g., `cell_0_0_10.png`, `cell_3_3_10.png`) for debugging
 - Adjustable board dimensions (default is **4×4**)
 - Adjustable total moves to be made by the engine (default is **1000**)
 
----
-
-## Requirements
-
-- **Python 3.12** (or a compatible version)
-- [Bluestacks Emulator](https://www.bluestacks.com/) (or another Android emulator)
-- Install dependencies via:
-  ```bash
-  pip install -r requirements.txt
-  ```
+*(More details below on installation, configuration, and usage.)*
 
 ---
 
@@ -52,9 +74,9 @@ This repository contains a Python-based automation tool for the popular game 204
    - `Down` → **Arrow down**
    - `Left` → **Arrow left**
    - `Right` → **Arrow right**
-   - `Undo` → **u**  
+   - `Undo` → **u**
 
-   These can be changed in [`game.py`](game.py), in the `key_map` dictionary:
+   These can be changed in [`game.py`](game.py) under the `key_map` dictionary:
    ```python
    key_map = {
        'up':    'up',
@@ -68,63 +90,40 @@ This repository contains a Python-based automation tool for the popular game 204
    ```bash
    python main.py
    ```
-4. The bot will attempt up to 1000 moves by default and automatically take screenshots to identify tile values.
+4. By default, the bot attempts 1000 moves. You can modify this in the `main.py` file if desired.
 
----
+![Demo GIF](2048.gif)
 
 ## Configuration
 
 1. **Emulator Window Dimensions**  
-   In [`game.py`](game.py) (or anywhere else coordinates are defined), ensure that the **EMULATOR** window dimensions match your system. By default, these dimensions are tuned for **Bluestacks** in fullscreen.
+   In [`game.py`](game.py) or wherever coordinates are set, ensure that your **EMULATOR** window dimensions match your display.
 
 2. **Saving Screenshots**  
-   Screenshots of each cell (e.g., `cell_0_0_10.png` to `cell_3_3_10.png`) are saved by default. If you **do not** want to save them:
-   - **Comment out** line 112 in [`cell_images.py`](cell_images.py):
-     ```python
-     # cv2.imwrite(filename, cell_img)
-     ```
+   Screenshots of each cell (e.g., `cell_0_0_10.png`, `cell_3_3_10.png`) are saved by default. Disable this by commenting out the line in [`cell_images.py`](cell_images.py) that writes the images.
 
 3. **Grid Size (Default 4×4)**  
-   If your 2048 variant uses a grid larger or smaller than 4×4, update the grid size in [`main.py`](main.py).  
-   Around line **246** (where `board = main(...)` is called), pass `rows` and `cols` to the `main` function:
-   ```python
-   board = main(
-       enable_logging=not args.disable_logging,
-       new_board=board,
-       rows=4,
-       cols=4
-   )
-   ```
-   Adjust `rows` and `cols` to match your version of the game.
+   If your 2048 variant uses a different grid (e.g., 5×5), adjust the `rows` and `cols` parameters in `main.py`.
 
 4. **Number of Moves**  
-   By default, the script runs for **1000** moves. To change this, modify the **for** loop around line **245** in [`main.py`](main.py):
-   ```python
-   for _ in range(1000):
-       ...
-   ```
-   Set it to any number you prefer.
+   In `main.py`, you can change the loop that runs for `range(1000)` moves to a smaller or larger value as you prefer.
 
 ---
 
 ## How It Works
 
 1. **Capture Board State**  
-   The script takes a screenshot of each cell in the 4×4 grid (or your custom dimensions) by parsing specific coordinates corresponding to the emulator window.
+   The script takes a screenshot of each cell in the grid by parsing specific emulator coordinates.
 
 2. **Tile Detection**  
-   Instead of using YOLOv11 or Tesseract (which had varying degrees of accuracy), the final approach uses **SSIM** (Structural Similarity) to compare each captured cell against a folder of labeled tile images (`1.png` for empty, `2.png`, `4.png`, `8.png`, and so on).
+   - **SSIM** (Structural Similarity) is the final approach used for tile recognition, referencing a labeled folder of tile images (e.g., `2.png`, `4.png`, etc.).
 
-3. **Deciding the Move (Strategy)**  
-   - **Chain of Tiles:** The strategy aims to arrange tiles in a decreasing order starting from the bottom-right corner. The largest tile should be at the bottom-right, the next largest to its left (or adjacent), and so on.
-   - **Heuristic Scoring:**  
-     1. **Encourage Larger Tiles:** For every tile on the board, the script adds `pow(3, log2(tile))` to a running score. This rewards creating bigger tiles, since a tile like `32` contributes more than `2`, `16` tiles.  
-     2. **Prioritize the Chain:** In addition, for any tile that is in the correct position to maintain the decreasing chain from the bottom-right corner, it adds `pow(4, log2(tile))`. Using base 4 here further emphasizes the importance of tiles placed in descending order.  
-
-   This combined scoring heuristic guides the engine to produce larger tiles and keep them aligned in a decreasing sequence along the bottom row and rightmost column, thus maximizing the chance of reaching (and surpassing!) 2048.
+3. **Move Selection (Heuristic)**  
+   - Encourages creation of larger tiles via exponential scoring.
+   - Attempts to keep larger tiles in a decreasing order along the bottom row and rightmost column (chain heuristic).
 
 4. **Repeat**  
-   The process repeats for a defined number of moves or until the game terminates.
+   The process iterates until the move limit is reached or the game terminates.
 
 ---
 
@@ -138,4 +137,4 @@ Feel free to submit issues or pull requests to improve the code, enhance detecti
 
 This project is provided under the [MIT License](LICENSE). You are free to fork, modify, and use it for your own 2048 automation endeavors.
 
-**Happy automating, and may you finally reach that coveted `262144 👀` tile (or beyond)!**
+**Happy automating, and may you reach that coveted `262144 👀` tile (or beyond)!**
